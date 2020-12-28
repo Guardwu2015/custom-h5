@@ -22,12 +22,20 @@
       </section>
       <!-- 中间画布 -->
       <section class="center">
+        <div
+          class='content'
+          @drop="handleDrop"
+          @dragover="handleDragOver"
+          @click="deselectCurComponent"
+        >
+          <editor />
+        </div>
       </section>
       <!-- 右侧属性列表 -->
       <section class="right">
         <el-tabs v-model="activeName">
           <el-tab-pane label="属性" name="attr">
-              <AttrList v-if="curComponent" />
+              <attr-list v-if="curComponent" />
               <p v-else class="placeholder">请选择组件</p>
           </el-tab-pane>
           <el-tab-pane label="动画" name="animation">
@@ -66,20 +74,34 @@
         </el-tabs>
       </section>
     </main>
+
+    <!-- 预览 -->
+    <preview v-model="isPreViewShow" @change="handlePreviewChange" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import ComponentList from '@/components/ComponentList' // 左侧列表组件
+import AttrList from '@/components/AttrList' // 右侧属性列表
+import Editor from '@/components/editor'
+import Preview from '@/components/editor/Preview'
+import componentListData from '@/custom-component/component-list'
+import { deepCopy } from '@/utils/utils'
+import generateID from '@/utils/generateID'
+
 export default {
   name: 'home',
   components: {
     ComponentList,
+    Editor,
+    Preview,
+    AttrList,
   },
   data () {
     return {
       activeName: 'attr',
+      isPreViewShow: false
     }
   },
   computed: mapState([
@@ -94,11 +116,42 @@ export default {
     },
     handleFileChange() {
     },
+    handleDrop(e) {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const component = deepCopy(componentListData[e.dataTransfer.getData('index')])
+      component.style.top = e.offsetY
+      component.style.left = e.offsetX
+      component.id = generateID()
+      this.$store.commit('addComponent', component)
+      this.$store.commit('recordSnapshot')
+    },
+    handleDragOver(e) {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'copy'
+    },
+    deselectCurComponent() {
+        this.$store.commit('setCurComponent', { component: null, zIndex: null })
+        this.$store.commit('hideContexeMenu')
+    },
     preview() {
+      this.isPreViewShow = true
+      this.$store.commit('setEditMode', 'read')
+    },
+    handlePreviewChange() {
+    },
+    previewAnimate() {
+        eventBus.$emit('runAnimation')
     },
     save() {
+      // TODO localstorage可以做一些优化
+      localStorage.setItem('canvasData', JSON.stringify(this.componentData))
+      localStorage.setItem('canvasStyle', JSON.stringify(this.canvasStyleData))
+      this.$message.success('保存成功')
     },
     clearCanvas() {
+      this.$store.commit('setComponentData', [])
     }
   }
 }
