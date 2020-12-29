@@ -4,7 +4,7 @@
             v-for="line in lines"
             :key="line"
             class="line"
-            :class="line.includes('x')? 'xline' : 'yline'"
+            :class="line.includes('x') ? 'xline' : 'yline'"
             :ref="line"
             v-show="lineStatus[line] || false"
         ></div>
@@ -165,41 +165,25 @@ export default {
             // 如果鼠标向右移动 则按从右到左的顺序显示竖线 否则按相反顺序显示
             // 如果鼠标向下移动 则按从下到上的顺序显示横线 否则按相反顺序显示
             if (isRightward) {
-                if (needToShow.includes('yr')) {
-                    this.lineStatus.yr = true
-                } else if (needToShow.includes('yc')) {
-                    this.lineStatus.yc = true
-                } else if (needToShow.includes('yl')) {
-                    this.lineStatus.yl = true
-                }
+                this.lineStatus.yr = needToShow.includes('yr')
+                this.lineStatus.yc = needToShow.includes('yc')
+                this.lineStatus.yl = needToShow.includes('yl')
             } else {
                 // eslint-disable-next-line no-lonely-if
-                if (needToShow.includes('yl')) {
-                    this.lineStatus.yl = true
-                } else if (needToShow.includes('yc')) {
-                    this.lineStatus.yc = true
-                } else if (needToShow.includes('yr')) {
-                    this.lineStatus.yr = true
-                }
+                this.lineStatus.yl = needToShow.includes('yl')
+                this.lineStatus.yc = needToShow.includes('yc')
+                this.lineStatus.yr = needToShow.includes('yr')
             }
 
             if (isDownward) {
-                if (needToShow.includes('xb')) {
-                    this.lineStatus.xb = true
-                } else if (needToShow.includes('xc')) {
-                    this.lineStatus.xc = true
-                } else if (needToShow.includes('xt')) {
-                    this.lineStatus.xt = true
-                }
+                this.lineStatus.xb = needToShow.includes('xb')
+                this.lineStatus.xc = needToShow.includes('xc')
+                this.lineStatus.xt = needToShow.includes('xt')
             } else {
                 // eslint-disable-next-line no-lonely-if
-                if (needToShow.includes('xt')) {
-                    this.lineStatus.xt = true
-                } else if (needToShow.includes('xc')) {
-                    this.lineStatus.xc = true
-                } else if (needToShow.includes('xb')) {
-                    this.lineStatus.xb = true
-                }
+                this.lineStatus.xt = needToShow.includes('xt')
+                this.lineStatus.xc = needToShow.includes('xc')
+                this.lineStatus.xb = needToShow.includes('xb')
             }
         },
 
