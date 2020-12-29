@@ -57,11 +57,13 @@ export default {
         },
     },
     components: { Shape, ContextMenu, MarkLine },
-    computed: mapState([
-        'componentData',
-        'curComponent',
-        'canvasStyleData',
-    ]),
+    computed: {
+        ...mapState([
+            'componentData',
+            'curComponent',
+            'canvasStyleData',
+        ])
+    },
     methods: {
         getShapeStyle(style, index) {
             const result = { ...style }

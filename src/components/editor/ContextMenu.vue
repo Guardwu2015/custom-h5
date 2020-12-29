@@ -14,11 +14,13 @@
 import { mapState } from 'vuex'
 
 export default {
-    computed: mapState([
-        'menuTop',
-        'menuLeft',
-        'menuShow',
-    ]),
+    computed: {
+        ...mapState([
+            'menuTop',
+            'menuLeft',
+            'menuShow',
+        ])
+    },
     methods: {
         deleteComponent() {
             this.$store.commit('deleteComponent')

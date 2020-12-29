@@ -23,9 +23,11 @@ export default {
             type: Object,
         },
     },
-    computed: mapState([
-        'editMode',
-    ]),
+    computed: {
+        ...mapState([
+            'editMode',
+        ])
+    },
     methods: {
         handleInput(e) {
             this.$emit('input', this.element, e.target.value)

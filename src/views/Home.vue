@@ -75,6 +75,38 @@
       </section>
     </main>
 
+    <!-- 选择动画 -->
+    <modal v-model="isShowAnimation">
+        <el-tabs v-model="animationActiveName">
+            <el-tab-pane v-for="item in animationClassData" :key="item.label" :label="item.label" :name="item.label">
+                <el-scrollbar class="animate-container">
+                    <div
+                        class="animate"
+                        v-for="(animate, index) in item.children"
+                        :key="index"
+                        @mouseover="hoverPreviewAnimate = animate.value"
+                        @click="addAnimation(animate)"
+                    >
+                        <div :class="[hoverPreviewAnimate === animate.value && animate.value + ' animated']">
+                            {{ animate.label }}
+                        </div>
+                    </div>
+                </el-scrollbar>
+            </el-tab-pane>
+        </el-tabs>
+    </modal>
+
+    <!-- 选择事件 -->
+    <Modal v-model="isShowEvent">
+      <el-tabs v-model="eventActiveName">
+        <el-tab-pane v-for="item in eventList" :key="item.key" :label="item.label" :name="item.key" style="padding: 0 20px">
+          <el-input v-if="item.key == 'redirect'" v-model="item.param" type="textarea" placeholder="请输入完整的 URL" />
+          <el-input v-if="item.key == 'alert'" v-model="item.param" type="textarea" placeholder="请输入要 alert 的内容" />
+          <el-button style="margin-top: 20px;" @click="addEvent(item.key, item.param)">确定</el-button>
+        </el-tab-pane>
+      </el-tabs>
+    </Modal>
+
     <!-- 预览 -->
     <preview v-model="isPreViewShow" @change="handlePreviewChange" />
   </div>
@@ -86,9 +118,13 @@ import ComponentList from '@/components/ComponentList' // 左侧列表组件
 import AttrList from '@/components/AttrList' // 右侧属性列表
 import Editor from '@/components/editor'
 import Preview from '@/components/editor/Preview'
+import Modal from '@/components/Modal'
 import componentListData from '@/custom-component/component-list'
 import { deepCopy } from '@/utils/utils'
 import generateID from '@/utils/generateID'
+import eventBus from '@/utils/eventBus'
+import animationClassData from '@/utils/animationClassData'
+import { eventList } from '@/utils/events'
 
 export default {
   name: 'home',
@@ -97,24 +133,69 @@ export default {
     Editor,
     Preview,
     AttrList,
+    Modal,
   },
   data () {
     return {
       activeName: 'attr',
-      isPreViewShow: false
+      isPreViewShow: false,
+      isShowAnimation: false,
+      isShowEvent: false,
+      animationActiveName: '进入',
+      animationClassData,
+      hoverPreviewAnimate: '',
+      eventActiveName: 'redirect',
+      eventList,
     }
   },
-  computed: mapState([
-    'componentData',
-    'curComponent',
-    'canvasStyleData',
-  ]),
+  computed: {
+    ...mapState([
+      'componentData',
+      'curComponent',
+      'canvasStyleData',
+    ])
+  },
   methods: {
     undo() {
+      this.$store.commit('undo')
     },
     redo() {
+      this.$store.commit('redo')
     },
-    handleFileChange() {
+    handleFileChange(e) {
+      const file = e.target.files[0]
+      if (!file.type.includes('image')) {
+          toast('只能插入图片', 'error')
+          return
+      }
+
+      const reader = new FileReader()
+      reader.onload = (res) => {
+          const fileResult = res.target.result
+          const img = new Image()
+          img.onload = () => {
+              this.$store.commit('addComponent', {
+                  id: generateID(),
+                  component: 'Picture', 
+                  label: '图片', 
+                  icon: '',
+                  propValue: fileResult,
+                  animations: [],
+                  events: [],
+                  style: {
+                      top: 0,
+                      left: 0,
+                      width: img.width,
+                      height: img.height,
+                      rotate: '',
+                  },
+              })
+          }
+
+          img.src = fileResult
+      }
+
+      reader.readAsDataURL(file)
     },
     handleDrop(e) {
       e.preventDefault()
@@ -152,7 +233,15 @@ export default {
     },
     clearCanvas() {
       this.$store.commit('setComponentData', [])
-    }
+    },
+    addAnimation(animate) {
+      this.$store.commit('addAnimation', animate)
+      this.isShowAnimation = false
+    },
+    addEvent(event, param) {
+      this.isShowEvent = false
+      this.$store.commit('addEvent', { event, param })
+    },
   }
 }
 </script>

@@ -47,9 +47,11 @@ export default {
             },
         }
     },
-    computed: mapState([
-        'curComponent',
-    ]),
+    computed: {
+        ...mapState([
+            'curComponent',
+        ])
+    },
     mounted() {
         eventBus.$on('runAnimation', () => {
             if (this.element == this.curComponent) {
