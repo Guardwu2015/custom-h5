@@ -137,10 +137,10 @@ export default {
   },
   data () {
     return {
-      activeName: 'attr',
       isPreViewShow: false,
       isShowAnimation: false,
       isShowEvent: false,
+      activeName: 'attr',
       animationActiveName: '进入',
       animationClassData,
       hoverPreviewAnimate: '',

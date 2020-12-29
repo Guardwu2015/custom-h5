@@ -1,5 +1,5 @@
 <template>
-    <div class="contextmenu" v-show="menuShow" :style="{ top: menuTop + 'px', left: menuLeft + 'px' }">
+    <div class="contextmenu" v-show="menuShow" :style="{ top: `${menuTop}px`, left: `${menuLeft}px` }">
         <ul>
             <li @click="deleteComponent">删除</li>
             <li @click="topComponent">置顶</li>

@@ -9,7 +9,7 @@
         }"
     >
         <!--页面组件列表展示-->
-        <Shape 
+        <shape 
             v-for="(item, index) in componentData"
             :defaultStyle="item.style"
             :style="getShapeStyle(item.style, index)"
@@ -19,7 +19,7 @@
             :zIndex="index"
         >
             <component
-                v-if="item.component != 'v-text'"
+                v-if="item.component !== 'v-text'"
                 class="component"
                 :is="item.component"
                 :style="getComponentStyle(item.style)"
@@ -34,11 +34,11 @@
                 @input="handleInput"
                 :element="item"
             />
-        </Shape>
+        </shape>
         <!-- 右击菜单 -->
-        <ContextMenu />
+        <context-menu />
         <!-- 标线 -->
-        <MarkLine />
+        <mark-line />
     </div>
 </template>
 

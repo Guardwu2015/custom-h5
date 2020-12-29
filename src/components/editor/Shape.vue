@@ -1,12 +1,17 @@
 <template>
-    <div class="shape" :class="{ active: this.active }" @click="selectCurComponent" @mousedown="handleMouseDown"
-    @contextmenu="handleContextMenu">
+    <div
+        :class="['shape', { active }]"
+        @click="hideContexeMenu"
+        @mousedown="handleMouseDown"
+        @contextmenu="handleContextMenu"
+    >
         <div
             class="shape-point"
-            v-for="(item, index) in (active? pointList : [])"
+            :style="getPointStyle(item)"
+            v-for="(item, index) in (active ? pointList : [])"
             @mousedown="handleMouseDownOnPoint(item)"
             :key="index"
-            :style="getPointStyle(item)">
+        >
         </div>
         <slot></slot>
     </div>
@@ -99,11 +104,11 @@ export default {
         },
 
         handleMouseDown(e) {
-            if (this.element.component != 'v-text') {
+            if (this.element.component !== 'v-text') {
                 e.preventDefault()
             }
-
             e.stopPropagation()
+
             this.$store.commit('setCurComponent', { component: this.element, zIndex: this.zIndex })
 
             const pos = { ...this.defaultStyle }
@@ -147,8 +152,7 @@ export default {
             document.addEventListener('mouseup', up)
         },
 
-        selectCurComponent(e) {
-            // 阻止向父组件冒泡
+        hideContexeMenu(e) {
             e.stopPropagation()
             e.preventDefault()
             this.$store.commit('hideContexeMenu')
