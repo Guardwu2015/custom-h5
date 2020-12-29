@@ -7,10 +7,10 @@
     >
         <div
             class="shape-point"
-            :style="getPointStyle(item)"
             v-for="(item, index) in (active ? pointList : [])"
-            @mousedown="handleMouseDownOnPoint(item)"
             :key="index"
+            :style="getPointStyle(item)"
+            @mousedown="handleMouseDownOnPoint(item)"
         >
         </div>
         <slot></slot>
@@ -76,24 +76,24 @@ export default {
             
             // 四个角的点
             if (point.length === 2) {
-                newLeft = hasL? 0 : width
-                newTop = hasT? 0 : height
+                newLeft = hasL ? 0 : width
+                newTop = hasT ? 0 : height
             } else {
-                // 上下两点的点，宽度居中
+                // 上下两边的中点，左右居中
                 if (hasT || hasB) {
                     newLeft = width / 2
-                    newTop = hasT? 0 : height
+                    newTop = hasT ? 0 : height
                 }
 
-                // 左右两边的点，高度居中
+                // 左右两边的中点，垂直居中
                 if (hasL || hasR) {
-                    newLeft = hasL? 0 : width
+                    newLeft = hasL ? 0 : width
                     newTop = Math.floor(height / 2)
                 }
             }
             
             const style = {
-                marginLeft: hasR? '-4px' : '-3px',
+                marginLeft: hasR ? '-4px' : '-3px',
                 marginTop: '-3px',
                 left: `${newLeft}px`,
                 top: `${newTop}px`,
@@ -111,12 +111,12 @@ export default {
 
             this.$store.commit('setCurComponent', { component: this.element, zIndex: this.zIndex })
 
-            const pos = { ...this.defaultStyle }
+            const style = { ...this.defaultStyle }
             const startY = e.clientY
             const startX = e.clientX
             // 如果直接修改属性，值的类型会变为字符串，所以要转为数值型
-            const startTop = Number(pos.top)
-            const startLeft = Number(pos.left)
+            const startTop = Number(style.top)
+            const startLeft = Number(style.left)
 
             // 如果元素没有移动，则不保存快照
             let hasMove = false
@@ -124,11 +124,11 @@ export default {
                 hasMove = true
                 const currX = moveEvent.clientX
                 const currY = moveEvent.clientY
-                pos.top = currY - startY + startTop
-                pos.left = currX - startX + startLeft
+                style.top = currY - startY + startTop
+                style.left = currX - startX + startLeft
 
                 // 修改当前组件样式
-                this.$store.commit('setShapeStyle', pos)
+                this.$store.commit('setShapeStyle', style)
                 // 等更新完当前组件的样式并绘制到屏幕后再判断是否需要吸附
                 // 如果不使用 $nextTick，吸附后将无法移动
                 this.$nextTick(() => {
@@ -159,21 +159,22 @@ export default {
         },
 
         handleMouseDownOnPoint(point) {
-            const downEvent = window.event
-            downEvent.stopPropagation()
-            downEvent.preventDefault()
+            const e = window.event
+            e.stopPropagation()
+            e.preventDefault()
 
-            const pos = { ...this.defaultStyle }
-            const height = Number(pos.height)
-            const width = Number(pos.width)
-            const top = Number(pos.top)
-            const left = Number(pos.left)
-            const startX = downEvent.clientX
-            const startY = downEvent.clientY
+            const style = { ...this.defaultStyle }
+            const height = Number(style.height)
+            const width = Number(style.width)
+            const top = Number(style.top)
+            const left = Number(style.left)
+            const startX = e.clientX
+            const startY = e.clientY
 
             // 是否需要保存快照
             let needSave = false
             const move = (moveEvent) => {
+                const { max } = Math
                 needSave = true
                 const currX = moveEvent.clientX
                 const currY = moveEvent.clientY
@@ -183,13 +184,16 @@ export default {
                 const hasB = /b/.test(point)
                 const hasL = /l/.test(point)
                 const hasR = /r/.test(point)
-                const newHeight = height + (hasT? -disY : hasB? disY : 0)
-                const newWidth = width + (hasL? -disX : hasR? disX : 0)
-                pos.height = newHeight > 0? newHeight : 0
-                pos.width = newWidth > 0? newWidth : 0
-                pos.left = left + (hasL? disX : 0)
-                pos.top = top + (hasT? disY : 0)
-                this.$store.commit('setShapeStyle', pos)
+                const newHeight = height + (hasT ? -disY : hasB ? disY : 0)
+                const newWidth = width + (hasL ? -disX : hasR ? disX : 0)
+                Object.assign(style, {
+                    height: max(newHeight, 0),
+                    width: max(newWidth, 0),
+                    left: left + (hasL ? disX : 0),
+                    top: top + (hasT ? disY : 0)
+                })
+
+                this.$store.commit('setShapeStyle', style)
             }
 
             const up = () => {
@@ -207,9 +211,7 @@ export default {
             e.preventDefault()
 
             // 计算菜单相对于编辑器的位移
-            let target = e.target
-            let top = e.offsetY
-            let left = e.offsetX
+            let { target, offsetY: top, offsetX: left } = e
             while (!target.className.includes('editor')) {
                 left += target.offsetLeft
                 top += target.offsetTop
